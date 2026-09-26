@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { QuickSearch } from "@/components/quick-search";
 
 // ─── SVG Icons ─────────────────────────────────────────────────────────────
 const Icon = {
@@ -189,6 +190,7 @@ export function Sidebar({
 
         {/* Nav */}
         <nav className="sidebar-nav">
+          <QuickSearch />
           <div className="sidebar-section-label">Workspace</div>
           {nav.map((item) => (
             <NavLink key={item.href} item={item} />

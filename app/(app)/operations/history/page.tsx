@@ -64,11 +64,63 @@ export default function HistoryPage() {
     });
   }
 
+  function exportCSV() {
+    if (!rows || rows.length === 0) return;
+    const headers = [
+      "Timestamp",
+      "Document Ref",
+      "Operation Type",
+      "Product SKU",
+      "Product Name",
+      "Quantity",
+      "From Location",
+      "To Location",
+      "User",
+      "Reason",
+    ];
+    const csvRows = [headers.join(",")];
+    for (const r of rows) {
+      csvRows.push(
+        [
+          `"${r.occurredAt}"`,
+          `"${r.pickingName}"`,
+          `"${r.type}"`,
+          `"${r.product.sku}"`,
+          `"${r.product.name.replace(/"/g, '""')}"`,
+          r.qty,
+          `"${r.from.completeName}"`,
+          `"${r.to.completeName}"`,
+          `"${r.user}"`,
+          `"${(r.reason || "").replace(/"/g, '""')}"`,
+        ].join(",")
+      );
+    }
+    const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `stocksense_ledger_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   return (
     <div className="animate-fade-in" style={{ maxWidth: 1440 }}>
       <PageHeader
         title="Move History"
         subtitle="Append-only ledger — every stock movement, permanently recorded"
+        actions={
+          rows && rows.length > 0 ? (
+            <button
+              onClick={exportCSV}
+              className="btn btn-secondary btn-sm flex items-center gap-1.5"
+            >
+              <span>📥</span>
+              <span>Export CSV</span>
+            </button>
+          ) : undefined
+        }
       />
 
       {/* ─── Filters ────────────────────────────────────────────────── */}
