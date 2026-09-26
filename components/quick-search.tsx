@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { api, type ProductRow } from "@/lib/client";
 
@@ -9,8 +10,13 @@ export function QuickSearch() {
   const [query, setQuery] = useState("");
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -71,11 +77,11 @@ export function QuickSearch() {
         </kbd>
       </button>
 
-      {/* Modal Backdrop */}
-      {open && (
+      {/* Modal Backdrop Portaled to document.body */}
+      {open && mounted && createPortal(
         <div
           className="fixed inset-0 flex items-start justify-center pt-20 px-4 bg-black/60 backdrop-blur-sm animate-fade-in"
-          style={{ zIndex: 9999 }}
+          style={{ zIndex: 99999 }}
           onClick={() => setOpen(false)}
         >
           <div
@@ -83,7 +89,7 @@ export function QuickSearch() {
             style={{
               background: "var(--surface)",
               borderColor: "var(--border-light)",
-              zIndex: 10000,
+              zIndex: 100000,
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -169,7 +175,8 @@ export function QuickSearch() {
               <span className="font-mono text-[10px]">StockSense Ledger Quick-Find</span>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
