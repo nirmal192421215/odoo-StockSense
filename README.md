@@ -1,6 +1,7 @@
 # 📦 StockSense — Enterprise Inventory & Warehouse Engine
 
 [![Production](https://img.shields.io/badge/Production-Live%20on%20Vercel-success?style=for-the-badge&logo=vercel)](https://odoo-omega.vercel.app)
+[![Demo Video](https://img.shields.io/badge/Demo_Video-Watch_Walkthrough-E50914?style=for-the-badge&logo=googledrive)](https://drive.google.com/file/d/1LTevcDiSRAGjvqE-0zIf-cpEfyf7eDIm/view?usp=sharing)
 [![Next.js](https://img.shields.io/badge/Next.js-16.3-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon%20Serverless-336791?style=for-the-badge&logo=postgresql)](https://neon.tech)
@@ -11,9 +12,10 @@
 
 ---
 
-## 🌐 Live Application & Demo Credentials
+## 🌐 Live Application & Demo Video
 
 🚀 **Live Deployment URL:** **[https://odoo-omega.vercel.app](https://odoo-omega.vercel.app)**  
+🎥 **Demo Video Walkthrough:** **[Watch on Google Drive](https://drive.google.com/file/d/1LTevcDiSRAGjvqE-0zIf-cpEfyf7eDIm/view?usp=sharing)**  
 *(Repository: [github.com/nirmal192421215/odoo-StockSense](https://github.com/nirmal192421215/odoo-StockSense))*
 
 | Role | Email | Password | Access / Capabilities |
