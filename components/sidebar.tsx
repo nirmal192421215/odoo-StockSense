@@ -45,6 +45,11 @@ const Icon = {
       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
     </svg>
   ),
+  Map: () => (
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+      <path fillRule="evenodd" d="M12 1.586l-4 4v12.828l4-4V1.586zM3.707 3.293A1 1 0 002 4v10a1 1 0 00.553.894l4 2A1 1 0 007 17V4.414L3.707 3.293zM13 17a1 1 0 00.447-.106l4-2A1 1 0 0018 14V4a1 1 0 00-.553-.894l-4-2A1 1 0 0013 2v15z" clipRule="evenodd" />
+    </svg>
+  ),
   Kanban: () => (
     <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
       <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z" />
@@ -87,14 +92,15 @@ type NavItem = {
 };
 
 const nav: NavItem[] = [
-  { href: "/dashboard",              label: "Dashboard",   icon: Icon.Dashboard },
-  { href: "/products",               label: "Products",    icon: Icon.Box },
-  { href: "/operations/receipts",    label: "Receipts",    icon: Icon.ArrowDown },
-  { href: "/operations/deliveries",  label: "Deliveries",  icon: Icon.ArrowUp },
-  { href: "/operations/transfers",   label: "Transfers",   icon: Icon.Shuffle },
-  { href: "/operations/adjustments", label: "Adjustments", icon: Icon.Adjust },
-  { href: "/operations/history",     label: "Move History",icon: Icon.History },
-  { href: "/operations/kanban",      label: "Kanban",      icon: Icon.Kanban },
+  { href: "/dashboard",              label: "Dashboard",       icon: Icon.Dashboard },
+  { href: "/operations/map",         label: "Warehouse Map",   icon: Icon.Map },
+  { href: "/products",               label: "Products",        icon: Icon.Box },
+  { href: "/operations/receipts",    label: "Receipts",        icon: Icon.ArrowDown },
+  { href: "/operations/deliveries",  label: "Deliveries",      icon: Icon.ArrowUp },
+  { href: "/operations/transfers",   label: "Transfers",       icon: Icon.Shuffle },
+  { href: "/operations/adjustments", label: "Adjustments",     icon: Icon.Adjust },
+  { href: "/operations/history",     label: "Move History",    icon: Icon.History },
+  { href: "/operations/kanban",      label: "Kanban",          icon: Icon.Kanban },
 ];
 
 const bottomNav: NavItem[] = [

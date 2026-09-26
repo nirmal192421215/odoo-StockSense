@@ -74,7 +74,8 @@ export function QuickSearch() {
       {/* Modal Backdrop */}
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-black/50 backdrop-blur-sm animate-fade-in"
+          className="fixed inset-0 flex items-start justify-center pt-20 px-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+          style={{ zIndex: 9999 }}
           onClick={() => setOpen(false)}
         >
           <div
@@ -82,6 +83,7 @@ export function QuickSearch() {
             style={{
               background: "var(--surface)",
               borderColor: "var(--border-light)",
+              zIndex: 10000,
             }}
             onClick={(e) => e.stopPropagation()}
           >
