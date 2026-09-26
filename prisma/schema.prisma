@@ -1,0 +1,240 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  inventory_manager
+  warehouse_staff
+}
+
+enum LocationType {
+  internal
+  supplier
+  customer
+  inventory_loss
+  production
+}
+
+enum PickingType {
+  receipt
+  delivery
+  internal
+  adjustment
+}
+
+enum PickingState {
+  draft
+  waiting
+  ready
+  done
+  canceled
+}
+
+enum PartnerType {
+  vendor
+  customer
+  both
+}
+
+enum AlertKind {
+  low_stock
+  out_of_stock
+}
+
+model User {
+  id                String        @id @default(cuid())
+  name              String
+  email             String        @unique
+  passwordHash      String
+  role              Role          @default(warehouse_staff)
+  createdAt         DateTime      @default(now())
+  pickingsCreated   Picking[]     @relation("CreatedBy")
+  pickingsValidated Picking[]     @relation("ValidatedBy")
+  ledgerEntries     StockLedger[]
+}
+
+model PasswordResetOtp {
+  id         String    @id @default(cuid())
+  email      String
+  codeHash   String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([email])
+}
+
+model Warehouse {
+  id        String     @id @default(cuid())
+  name      String
+  code      String     @unique
+  active    Boolean    @default(true)
+  locations Location[]
+  pickings  Picking[]
+}
+
+model Location {
+  id               String         @id @default(cuid())
+  name             String
+  completeName     String
+  type             LocationType
+  warehouseId      String?
+  warehouse        Warehouse?     @relation(fields: [warehouseId], references: [id])
+  quants           StockQuant[]
+  pickingsAsSource Picking[]      @relation("PickingSource")
+  pickingsAsDest   Picking[]      @relation("PickingDest")
+  linesAsSource    PickingLine[]  @relation("LineSource")
+  linesAsDest      PickingLine[]  @relation("LineDest")
+  movesAsSource    StockMove[]    @relation("MoveSource")
+  movesAsDest      StockMove[]    @relation("MoveDest")
+  ledgerFrom       StockLedger[]  @relation("LedgerFrom")
+  ledgerTo         StockLedger[]  @relation("LedgerTo")
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  products Product[]
+}
+
+model Uom {
+  id       String    @id @default(cuid())
+  name     String
+  symbol   String
+  products Product[]
+}
+
+model Partner {
+  id       String      @id @default(cuid())
+  name     String
+  type     PartnerType
+  pickings Picking[]
+}
+
+model Product {
+  id         String         @id @default(cuid())
+  name       String
+  sku        String         @unique
+  categoryId String
+  category   Category       @relation(fields: [categoryId], references: [id])
+  uomId      String
+  uom        Uom            @relation(fields: [uomId], references: [id])
+  minQty     Decimal        @default(0) @db.Decimal(18, 4)
+  active     Boolean        @default(true)
+  quants     StockQuant[]
+  lines      PickingLine[]
+  moves      StockMove[]
+  ledger     StockLedger[]
+  alert      Alert?
+}
+
+model StockQuant {
+  id         String   @id @default(cuid())
+  productId  String
+  locationId String
+  quantity   Decimal  @default(0) @db.Decimal(18, 4)
+  product    Product  @relation(fields: [productId], references: [id])
+  location   Location @relation(fields: [locationId], references: [id])
+
+  @@unique([productId, locationId])
+}
+
+model PickingSequence {
+  prefix     String @id
+  nextNumber Int    @default(1)
+}
+
+model Picking {
+  id               String        @id @default(cuid())
+  name             String        @unique
+  type             PickingType
+  state            PickingState  @default(draft)
+  warehouseId      String
+  warehouse        Warehouse     @relation(fields: [warehouseId], references: [id])
+  partnerId        String?
+  partner          Partner?      @relation(fields: [partnerId], references: [id])
+  sourceLocationId String
+  destLocationId   String
+  sourceLocation   Location      @relation("PickingSource", fields: [sourceLocationId], references: [id])
+  destLocation     Location      @relation("PickingDest", fields: [destLocationId], references: [id])
+  scheduledAt      DateTime      @default(now())
+  validatedAt      DateTime?
+  validatedById    String?
+  validatedBy      User?         @relation("ValidatedBy", fields: [validatedById], references: [id])
+  picked           Boolean       @default(false)
+  packed           Boolean       @default(false)
+  reason           String?
+  notes            String?
+  createdById      String
+  createdBy        User          @relation("CreatedBy", fields: [createdById], references: [id])
+  updatedAt        DateTime      @updatedAt
+  createdAt        DateTime      @default(now())
+  lines            PickingLine[]
+  moves            StockMove[]
+  ledger           StockLedger[]
+}
+
+model PickingLine {
+  id               String   @id @default(cuid())
+  pickingId        String
+  picking          Picking  @relation(fields: [pickingId], references: [id], onDelete: Cascade)
+  productId        String
+  product          Product  @relation(fields: [productId], references: [id])
+  qty              Decimal  @db.Decimal(18, 4)
+  sourceLocationId String
+  destLocationId   String
+  sourceLocation   Location @relation("LineSource", fields: [sourceLocationId], references: [id])
+  destLocation     Location @relation("LineDest", fields: [destLocationId], references: [id])
+}
+
+model StockMove {
+  id               String   @id @default(cuid())
+  pickingId        String
+  picking          Picking  @relation(fields: [pickingId], references: [id])
+  productId        String
+  product          Product  @relation(fields: [productId], references: [id])
+  qty              Decimal  @db.Decimal(18, 4)
+  sourceLocationId String
+  destLocationId   String
+  sourceLocation   Location @relation("MoveSource", fields: [sourceLocationId], references: [id])
+  destLocation     Location @relation("MoveDest", fields: [destLocationId], references: [id])
+  createdAt        DateTime @default(now())
+}
+
+model StockLedger {
+  id             String      @id @default(cuid())
+  occurredAt     DateTime    @default(now())
+  productId      String
+  product        Product     @relation(fields: [productId], references: [id])
+  fromLocationId String
+  toLocationId   String
+  fromLocation   Location    @relation("LedgerFrom", fields: [fromLocationId], references: [id])
+  toLocation     Location    @relation("LedgerTo", fields: [toLocationId], references: [id])
+  qty            Decimal     @db.Decimal(18, 4)
+  pickingId      String
+  picking        Picking     @relation(fields: [pickingId], references: [id])
+  pickingName    String
+  type           PickingType
+  userId         String
+  user           User        @relation(fields: [userId], references: [id])
+  reason         String?
+
+  @@index([productId, occurredAt])
+  @@index([fromLocationId])
+  @@index([toLocationId])
+  @@index([type])
+}
+
+model Alert {
+  id        String    @id @default(cuid())
+  productId String    @unique
+  product   Product   @relation(fields: [productId], references: [id])
+  kind      AlertKind
+  onHand    Decimal   @db.Decimal(18, 4)
+  minQty    Decimal   @db.Decimal(18, 4)
+}
