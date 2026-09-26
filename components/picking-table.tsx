@@ -24,9 +24,10 @@ export function PickingTable({
             <tr>
               <th>Reference</th>
               <th>Status</th>
-              <th>Partner</th>
+              <th>Contact</th>
               <th>From</th>
               <th>To</th>
+              <th>Schedule Date</th>
               <th>WH</th>
             </tr>
           </thead>
@@ -42,15 +43,36 @@ export function PickingTable({
                     {row.name}
                   </Link>
                 </td>
-                <td><StatusPill state={row.state} /></td>
+                <td>
+                  <StatusPill state={row.state} />
+                </td>
                 <td style={{ color: "var(--ink-muted)", fontSize: "0.8125rem" }}>
-                  {row.partner?.name ?? <span style={{ color: "var(--ink-faint)" }}>—</span>}
+                  {row.partner?.name ?? (
+                    <span style={{ color: "var(--ink-faint)" }}>—</span>
+                  )}
                 </td>
                 <td style={{ color: "var(--ink-muted)", fontSize: "0.8125rem" }}>
                   {row.sourceLocation?.completeName ?? "—"}
                 </td>
                 <td style={{ color: "var(--ink-muted)", fontSize: "0.8125rem" }}>
                   {row.destLocation?.completeName ?? "—"}
+                </td>
+                <td
+                  style={{
+                    color: "var(--ink-muted)",
+                    fontSize: "0.8125rem",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {row.scheduledAt ? (
+                    new Date(row.scheduledAt).toLocaleDateString("en-IN", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })
+                  ) : (
+                    <span style={{ color: "var(--ink-faint)" }}>—</span>
+                  )}
                 </td>
                 <td>
                   <span

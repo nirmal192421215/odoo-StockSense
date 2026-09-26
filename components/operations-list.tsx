@@ -10,6 +10,7 @@ export function OperationsList({ kind }: { kind: keyof typeof opMeta }) {
   const meta = opMeta[kind];
   const [rows, setRows] = useState<PickingRow[] | null>(null);
   const [state, setState] = useState("");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const q = new URLSearchParams({ type: meta.type });
@@ -17,15 +18,35 @@ export function OperationsList({ kind }: { kind: keyof typeof opMeta }) {
     api<{ pickings: PickingRow[] }>(`/api/pickings?${q}`).then((d) => setRows(d.pickings));
   }, [meta.type, state]);
 
+  const filteredRows = rows ? rows.filter((r) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    const matchName = r.name.toLowerCase().includes(q);
+    const matchPartner = r.partner?.name?.toLowerCase().includes(q);
+    const matchDest = r.destLocation?.completeName?.toLowerCase().includes(q);
+    const matchSrc = r.sourceLocation?.completeName?.toLowerCase().includes(q);
+    return matchName || matchPartner || matchDest || matchSrc;
+  }) : null;
+
   return (
     <div className="animate-fade-in" style={{ maxWidth: 1280 }}>
       <PageHeader
         title={meta.title}
         subtitle={rows ? `${rows.length} document${rows.length !== 1 ? "s" : ""}` : undefined}
         actions={
-          <Link href={`/operations/${kind}/new`}>
-            <Button>+ {meta.create}</Button>
-          </Link>
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <Link
+              href={`/operations/kanban?type=${meta.type}`}
+              className="btn btn-secondary btn-sm"
+              title="Switch to Kanban board"
+              style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+            >
+              <span>🗂️</span> Kanban View
+            </Link>
+            <Link href={`/operations/${kind}/new`}>
+              <Button>+ {meta.create}</Button>
+            </Link>
+          </div>
         }
       />
 
@@ -40,6 +61,29 @@ export function OperationsList({ kind }: { kind: keyof typeof opMeta }) {
           flexWrap: "wrap",
         }}
       >
+        <div style={{ position: "relative", flex: 1, minWidth: 200, maxWidth: 320 }}>
+          <input
+            type="text"
+            placeholder="Search reference, contact..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="form-input text-sm"
+            style={{ width: "100%", paddingLeft: 30 }}
+          />
+          <span
+            style={{
+              position: "absolute",
+              left: 10,
+              top: "50%",
+              transform: "translateY(-50%)",
+              fontSize: "0.8rem",
+              opacity: 0.6,
+            }}
+          >
+            🔍
+          </span>
+        </div>
+
         <select
           className={selectClass()}
           style={{ maxWidth: 200 }}
@@ -53,33 +97,51 @@ export function OperationsList({ kind }: { kind: keyof typeof opMeta }) {
             </option>
           ))}
         </select>
-        {state && (
-          <button className="btn btn-ghost btn-sm" onClick={() => setState("")}>
+        {(state || search) && (
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={() => {
+              setState("");
+              setSearch("");
+            }}
+          >
             Clear
           </button>
         )}
       </div>
 
-      {!rows ? (
+      {!filteredRows ? (
         <div className="card" style={{ overflow: "hidden" }}>
           <Spinner />
         </div>
-      ) : rows.length === 0 ? (
+      ) : filteredRows.length === 0 ? (
         <div className="card" style={{ overflow: "hidden" }}>
           <EmptyState
             icon="📋"
-            title={`No ${meta.title.toLowerCase()} yet`}
-            subtitle={`Create your first ${meta.singular.toLowerCase()} to get started.`}
+            title={rows && rows.length > 0 ? "No matching operations" : `No ${meta.title.toLowerCase()} yet`}
+            subtitle={rows && rows.length > 0 ? "Try adjusting your search or status filter." : `Create your first ${meta.singular.toLowerCase()} to get started.`}
             action={
-              <Link href={`/operations/${kind}/new`}>
-                <Button size="sm">+ {meta.create}</Button>
-              </Link>
+              rows && rows.length > 0 ? (
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => {
+                    setState("");
+                    setSearch("");
+                  }}
+                >
+                  Reset Filters
+                </button>
+              ) : (
+                <Link href={`/operations/${kind}/new`}>
+                  <Button size="sm">+ {meta.create}</Button>
+                </Link>
+              )
             }
           />
         </div>
       ) : (
         <PickingTable
-          rows={rows}
+          rows={filteredRows}
           empty={`No ${meta.title.toLowerCase()} yet.`}
           createHref={`/operations/${kind}/new`}
           createLabel={meta.create}

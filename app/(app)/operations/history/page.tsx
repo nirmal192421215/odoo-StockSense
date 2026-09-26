@@ -24,6 +24,18 @@ const typeColor: Record<PickingType, { bg: string; color: string; label: string 
   adjustment: { bg: "#fffbeb", color: "#d97706", label: "Adjustment" },
 };
 
+// Row direction colouring per wireframe: In = green accent, Out = red accent
+function rowDirection(type: PickingType): { rowBg: string; qtyColor: string; qtyPrefix: string } {
+  if (type === "receipt") {
+    return { rowBg: "rgba(22, 163, 74, 0.04)", qtyColor: "#16a34a", qtyPrefix: "+" };
+  }
+  if (type === "delivery") {
+    return { rowBg: "rgba(220, 38, 38, 0.04)", qtyColor: "#dc2626", qtyPrefix: "-" };
+  }
+  // internal: neutral, adjustment: depends but show neutral
+  return { rowBg: "transparent", qtyColor: "var(--ink)", qtyPrefix: "" };
+}
+
 export default function HistoryPage() {
   const [master, setMaster]     = useState<Master | null>(null);
   const [products, setProducts] = useState<ProductRow[]>([]);
@@ -233,8 +245,17 @@ export default function HistoryPage() {
               <tbody>
                 {rows.map((r, i) => {
                   const tc = typeColor[r.type];
+                  const dir = rowDirection(r.type);
                   return (
-                    <tr key={r.id} className="animate-fade-in" style={{ animationDelay: `${Math.min(i * 20, 300)}ms` }}>
+                    <tr
+                      key={r.id}
+                      className="animate-fade-in"
+                      style={{
+                        animationDelay: `${Math.min(i * 20, 300)}ms`,
+                        background: dir.rowBg,
+                        borderLeft: dir.qtyPrefix === "+" ? "3px solid #16a34a" : dir.qtyPrefix === "-" ? "3px solid #dc2626" : "3px solid transparent",
+                      }}
+                    >
                       <td style={{ whiteSpace: "nowrap", color: "var(--ink-muted)", fontSize: "0.8rem" }}>
                         {fmtDate(r.occurredAt)}
                       </td>
@@ -275,8 +296,8 @@ export default function HistoryPage() {
                       <td style={{ fontSize: "0.8125rem", color: "var(--ink-muted)", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {r.to.completeName}
                       </td>
-                      <td style={{ textAlign: "right", fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--ink)" }}>
-                        {Number(r.qty).toFixed(2)}
+                      <td style={{ textAlign: "right", fontWeight: 700, fontFamily: "var(--font-mono)", color: dir.qtyColor }}>
+                        {dir.qtyPrefix}{Number(r.qty).toFixed(2)}
                       </td>
                       <td style={{ fontSize: "0.8rem", color: "var(--ink-muted)" }}>{r.user}</td>
                       <td style={{ fontSize: "0.8rem" }}>

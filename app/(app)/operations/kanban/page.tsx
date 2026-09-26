@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { PageHeader, StatusPill, Spinner, EmptyState, selectClass } from "@/components/ui";
 import { api, opPath, type PickingRow, type PickingState, type PickingType } from "@/lib/client";
 
@@ -20,9 +21,11 @@ const typeBadge: Record<PickingType, { label: string; bg: string; color: string 
   adjustment: { label: "Adjustment", bg: "rgba(217, 119, 6, 0.1)", color: "#b45309" },
 };
 
-export default function KanbanPage() {
+function KanbanContent() {
+  const searchParams = useSearchParams();
+  const initialType = searchParams.get("type") || "";
   const [rows, setRows] = useState<PickingRow[] | null>(null);
-  const [typeFilter, setTypeFilter] = useState<string>("");
+  const [typeFilter, setTypeFilter] = useState<string>(initialType);
   const [search, setSearch] = useState<string>("");
 
   useEffect(() => {
@@ -60,6 +63,14 @@ export default function KanbanPage() {
         subtitle={`Live visual pipeline of warehouse operations (${rows.length} total)`}
         actions={
           <div className="flex items-center gap-3">
+            <Link
+              href={typeFilter ? `/operations/${opPath(typeFilter as PickingType)}` : `/operations/receipts`}
+              className="btn btn-secondary btn-sm"
+              title="Switch back to tabular list view"
+              style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+            >
+              <span>📋</span> List View
+            </Link>
             <span
               className="text-xs px-2.5 py-1 rounded-full font-medium hidden sm:inline-block"
               style={{
@@ -220,5 +231,13 @@ export default function KanbanPage() {
         })}
       </div>
     </div>
+  );
+}
+
+export default function KanbanPage() {
+  return (
+    <Suspense fallback={<Spinner />}>
+      <KanbanContent />
+    </Suspense>
   );
 }

@@ -31,7 +31,9 @@ export async function createPicking(input: {
   }
 
   const picking = await prisma.$transaction(async (tx) => {
-    const name = await nextPickingName(tx, input.type);
+    // Fetch warehouse code for WH-prefixed reference (e.g. WH1/IN/00001)
+    const warehouse = await tx.warehouse.findUnique({ where: { id: input.warehouseId } });
+    const name = await nextPickingName(tx, input.type, warehouse?.code);
     const src = await tx.location.findUnique({ where: { id: input.sourceLocationId } });
     const dest = await tx.location.findUnique({ where: { id: input.destLocationId } });
     if (!src || !dest) throw new StockError(Messages.locations);
