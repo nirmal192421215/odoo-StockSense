@@ -172,6 +172,6 @@ export async function validatePicking(pickingId: string, userId: string) {
 
       return updated;
     },
-    { timeout: 20000 },
+    { timeout: 35000, maxWait: 15000 },
   );
 }

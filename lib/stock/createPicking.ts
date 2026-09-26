@@ -78,7 +78,7 @@ export async function createPicking(input: {
         },
       },
     });
-  });
+  }, { timeout: 30000, maxWait: 15000 });
 
   if (input.autoValidate) {
     await confirmPicking(picking.id);
